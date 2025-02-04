@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        #pdf-viewer {
+            width: 80%;
+            height: 80vh;
+            border: 1px solid #ccc;
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div id="pdf-viewer"></div>
+
+    <!-- Include PDF.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js" integrity="sha512-..."></script>
+
+    <script>
+        // Function to load and render the PDF
+        async function loadPDF(pdfPath) {
+            const pdfViewer = document.getElementById('pdf-viewer');
+
+            // Load the PDF document
+            const loadingTask = pdfjsLib.getDocument(pdfPath);
+            const pdf = await loadingTask.promise;
+
+            // Loop through each page and render it
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+                const scale = 1.5;
+                const viewport = page.getViewport({ scale });
+
+                // Create a canvas element for the page
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                // Append the canvas to the PDF viewer
+                pdfViewer.appendChild(canvas);
+
+                // Render the page on the canvas
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                await page.render(renderContext).promise;
+            }
+        }
+
+        // Load the PDF file in the current directory
+        const pdfFile = 'cv.pdf'; // Replace with your PDF file name
+        loadPDF(pdfFile).catch(error => {
+            console.error('Error loading PDF:', error);
+        });
+    </script>
+</body>
+</html>
